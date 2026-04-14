@@ -1,27 +1,27 @@
 # astrbot_plugin_what2eat
 
-A dinner assistant plugin for AstrBot.
+一个用于“今天吃什么”的 AstrBot 晚餐助手插件。
 
-## Features
+## 功能特性
 
-- Multi-category meal picking with independent trees (`main`, `side`, `drink`, ...).
-- Flavor toggles that can be enabled/disabled and used by picker.
-- Plugin config is managed by AstrBot built-in plugin config panel via `_conf_schema.json`.
-- Legacy state migration is supported from `data/plugin_data/astrbot_plugin_what2eat/state.json`.
+- 支持多分类独立抽取（如主食、配菜、饮料）。
+- 支持口味标签与口味筛选开关。
+- 通过 AstrBot 插件配置面板可视化配置（基于 `_conf_schema.json`）。
+- 兼容旧版状态文件，启动时可自动迁移 `data/plugin_data/astrbot_plugin_what2eat/state.json`。
 
-## Commands
+## 指令
 
-- `/what2eat`: draw one result path for each enabled category.
-- `/what2eat_flavors`: show current flavor list and active flavor toggles.
+- `/what2eat`：按已启用分类各随机抽取一条结果。
+- `/what2eat_flavors`：显示当前口味列表与启用状态。
 
-## Dashboard API Routes
+## 插件 API 路由
 
 - `GET /api/plug/what2eat/state`
 - `POST /api/plug/what2eat/state`
 - `POST /api/plug/what2eat/toggles`
 - `POST /api/plug/what2eat/pick`
 
-## Notes
+## 说明
 
-- The plugin never uses `requests`.
-- Invalid or malformed state is normalized automatically to safe defaults.
+- 插件不使用 `requests`。
+- 对异常或不完整配置会自动规范化并回退到安全结构。

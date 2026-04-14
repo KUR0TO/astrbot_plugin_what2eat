@@ -1,35 +1,35 @@
 {
   "version": {
     "type": "int",
-    "description": "Config version",
-    "hint": "Internal config version used by plugin normalization.",
+    "description": "配置版本",
+    "hint": "插件内部使用的配置版本字段。",
     "default": 1,
     "invisible": true
   },
   "categories": {
     "type": "template_list",
-    "description": "Meal categories",
-    "hint": "Each category has id/label/enabled and tree_json.",
+    "description": "食谱分类",
+    "hint": "每个分类包含 id、名称、启用状态和菜谱树 JSON。",
     "templates": {
       "category": {
-        "name": "Category",
+        "name": "分类",
         "items": {
           "id": {
             "type": "string",
-            "description": "Category id"
+            "description": "分类 ID"
           },
           "label": {
             "type": "string",
-            "description": "Category label"
+            "description": "分类名称"
           },
           "enabled": {
             "type": "bool",
-            "description": "Enabled"
+            "description": "默认启用"
           },
           "tree": {
             "type": "text",
-            "description": "Category tree JSON",
-            "hint": "Provide JSON object with id/label/weight/flavors/children/items.",
+            "description": "分类菜谱树 JSON",
+            "hint": "请填写包含 id/label/weight/flavors/children/items 的 JSON 对象。",
             "editor_mode": true,
             "editor_language": "json",
             "editor_theme": "vs-light"
@@ -41,50 +41,50 @@
       {
         "__template_key": "category",
         "id": "main",
-        "label": "Main",
+        "label": "主食",
         "enabled": true,
-        "tree": "{\n  \"id\": \"root_main\",\n  \"label\": \"Main\",\n  \"weight\": 1,\n  \"flavors\": [],\n  \"children\": [],\n  \"items\": [\n    {\n      \"id\": \"item_main\",\n      \"label\": \"rice/noodle/bread\",\n      \"weight\": 1,\n      \"flavors\": [],\n      \"children\": [],\n      \"items\": []\n    }\n  ]\n}"
+        "tree": "{\n  \"id\": \"root_main\",\n  \"label\": \"主食\",\n  \"weight\": 1,\n  \"flavors\": [],\n  \"children\": [],\n  \"items\": [\n    {\n      \"id\": \"item_main\",\n      \"label\": \"米饭/面条/面包\",\n      \"weight\": 1,\n      \"flavors\": [],\n      \"children\": [],\n      \"items\": []\n    }\n  ]\n}"
       },
       {
         "__template_key": "category",
         "id": "side",
-        "label": "Side",
+        "label": "配菜",
         "enabled": true,
-        "tree": "{\n  \"id\": \"root_side\",\n  \"label\": \"Side\",\n  \"weight\": 1,\n  \"flavors\": [],\n  \"children\": [],\n  \"items\": [\n    {\n      \"id\": \"item_side\",\n      \"label\": \"vegetables/meat\",\n      \"weight\": 1,\n      \"flavors\": [],\n      \"children\": [],\n      \"items\": []\n    }\n  ]\n}"
+        "tree": "{\n  \"id\": \"root_side\",\n  \"label\": \"配菜\",\n  \"weight\": 1,\n  \"flavors\": [],\n  \"children\": [],\n  \"items\": [\n    {\n      \"id\": \"item_side\",\n      \"label\": \"蔬菜/肉类\",\n      \"weight\": 1,\n      \"flavors\": [],\n      \"children\": [],\n      \"items\": []\n    }\n  ]\n}"
       },
       {
         "__template_key": "category",
         "id": "drink",
-        "label": "Drink",
+        "label": "饮料",
         "enabled": true,
-        "tree": "{\n  \"id\": \"root_drink\",\n  \"label\": \"Drink\",\n  \"weight\": 1,\n  \"flavors\": [],\n  \"children\": [],\n  \"items\": [\n    {\n      \"id\": \"item_drink\",\n      \"label\": \"tea/juice/soda\",\n      \"weight\": 1,\n      \"flavors\": [],\n      \"children\": [],\n      \"items\": []\n    }\n  ]\n}"
+        "tree": "{\n  \"id\": \"root_drink\",\n  \"label\": \"饮料\",\n  \"weight\": 1,\n  \"flavors\": [],\n  \"children\": [],\n  \"items\": [\n    {\n      \"id\": \"item_drink\",\n      \"label\": \"茶/果汁/汽水\",\n      \"weight\": 1,\n      \"flavors\": [],\n      \"children\": [],\n      \"items\": []\n    }\n  ]\n}"
       }
     ]
   },
   "flavors": {
     "type": "template_list",
-    "description": "Flavor tags",
-    "hint": "Define flavor ids used by tree nodes and filters.",
+    "description": "口味标签",
+    "hint": "定义菜谱节点和筛选使用的口味 ID。",
     "templates": {
       "flavor": {
-        "name": "Flavor",
+        "name": "口味",
         "items": {
           "id": {
             "type": "string",
-            "description": "Flavor id"
+            "description": "口味 ID"
           },
           "label": {
             "type": "string",
-            "description": "Flavor label"
+            "description": "口味名称"
           },
           "description": {
             "type": "string",
-            "description": "Flavor description",
+            "description": "口味描述",
             "default": ""
           },
           "enabled_by_default": {
             "type": "bool",
-            "description": "Enabled by default",
+            "description": "默认启用",
             "default": false
           }
         }
@@ -94,13 +94,13 @@
   },
   "toggles": {
     "type": "object",
-    "description": "Current toggle states",
-    "hint": "Enable/disable categories and active flavor filters.",
+    "description": "当前开关",
+    "hint": "控制当前启用的口味筛选。",
     "items": {
       "flavors": {
         "type": "list",
-        "description": "Active flavor filter ids",
-        "hint": "Flavor ids used for filtering when generating results.",
+        "description": "已启用的口味 ID",
+        "hint": "仅列表中的口味会参与过滤。",
         "default": []
       }
     }

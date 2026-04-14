@@ -1,0 +1,120 @@
+{
+  "version": {
+    "type": "int",
+    "description": "Config version",
+    "hint": "Internal config version used by plugin normalization.",
+    "default": 1,
+    "invisible": true
+  },
+  "categories": {
+    "type": "dict",
+    "description": "Meal categories",
+    "hint": "Edit category metadata and nested meal tree JSON by category id.",
+    "default": {
+      "main": {
+        "label": "Main",
+        "enabled": true,
+        "tree": {
+          "id": "root_main",
+          "label": "Main",
+          "weight": 1,
+          "flavors": [],
+          "children": [],
+          "items": [
+            {
+              "id": "item_main",
+              "label": "rice/noodle/bread",
+              "weight": 1,
+              "flavors": [],
+              "children": [],
+              "items": []
+            }
+          ]
+        }
+      },
+      "side": {
+        "label": "Side",
+        "enabled": true,
+        "tree": {
+          "id": "root_side",
+          "label": "Side",
+          "weight": 1,
+          "flavors": [],
+          "children": [],
+          "items": [
+            {
+              "id": "item_side",
+              "label": "vegetables/meat",
+              "weight": 1,
+              "flavors": [],
+              "children": [],
+              "items": []
+            }
+          ]
+        }
+      },
+      "drink": {
+        "label": "Drink",
+        "enabled": true,
+        "tree": {
+          "id": "root_drink",
+          "label": "Drink",
+          "weight": 1,
+          "flavors": [],
+          "children": [],
+          "items": [
+            {
+              "id": "item_drink",
+              "label": "tea/juice/soda",
+              "weight": 1,
+              "flavors": [],
+              "children": [],
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    "items": {},
+    "editor_mode": true,
+    "editor_language": "json",
+    "editor_theme": "vs-light"
+  },
+  "flavors": {
+    "type": "dict",
+    "description": "Flavor tags",
+    "hint": "Edit flavor definition by flavor id, for example spicy/sweet.",
+    "default": {},
+    "items": {},
+    "editor_mode": true,
+    "editor_language": "json",
+    "editor_theme": "vs-light"
+  },
+  "toggles": {
+    "type": "object",
+    "description": "Current toggle states",
+    "hint": "Enable/disable categories and active flavor filters.",
+    "items": {
+      "categories": {
+        "type": "dict",
+        "description": "Category switches",
+        "hint": "Dictionary of category id to true/false.",
+        "default": {
+          "main": true,
+          "side": true,
+          "drink": true
+        },
+        "items": {},
+        "editor_mode": true,
+        "editor_language": "json",
+        "editor_theme": "vs-light"
+      },
+      "flavors": {
+        "type": "list",
+        "description": "Active flavor filter ids",
+        "hint": "Flavor ids used for filtering when generating results.",
+        "default": []
+      }
+    }
+  }
+}

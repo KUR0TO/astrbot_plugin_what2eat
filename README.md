@@ -1,14 +1,30 @@
-# astrbot-plugin-helloworld
+# astrbot_plugin_what2eat
 
-AstrBot 插件模板 / A template plugin for AstrBot plugin feature
+A dinner assistant plugin for AstrBot.
 
-> [!NOTE]
-> This repo is just a template of [AstrBot](https://github.com/AstrBotDevs/AstrBot) Plugin.
-> 
-> [AstrBot](https://github.com/AstrBotDevs/AstrBot) is an agentic assistant for both personal and group conversations. It can be deployed across dozens of mainstream instant messaging platforms, including QQ, Telegram, Feishu, DingTalk, Slack, LINE, Discord, Matrix, etc. In addition, it provides a reliable and extensible conversational AI infrastructure for individuals, developers, and teams. Whether you need a personal AI companion, an intelligent customer support agent, an automation assistant, or an enterprise knowledge base, AstrBot enables you to quickly build AI applications directly within your existing messaging workflows.
+## Features
 
-# Supports
+- Multi-category meal picking with independent trees (`main`, `side`, `drink`, ...).
+- Flavor toggles that can be enabled/disabled and used by picker and AI generation.
+- Persistent state in AstrBot data directory: `data/plugin_data/astrbot_plugin_what2eat/state.json`.
+- Dashboard custom panel for managing categories, flavors, provider, and AI suggestions.
+- AI suggestion endpoint appends generated items into the selected tree node.
 
-- [AstrBot Repo](https://github.com/AstrBotDevs/AstrBot)
-- [AstrBot Plugin Development Docs (Chinese)](https://docs.astrbot.app/dev/star/plugin-new.html)
-- [AstrBot Plugin Development Docs (English)](https://docs.astrbot.app/en/dev/star/plugin-new.html)
+## Commands
+
+- `/what2eat`: draw one result path for each enabled category.
+- `/what2eat_flavors`: show current flavor list and active flavor toggles.
+
+## Dashboard API Routes
+
+- `GET /api/plug/what2eat/state`
+- `POST /api/plug/what2eat/state`
+- `POST /api/plug/what2eat/toggles`
+- `GET /api/plug/what2eat/providers`
+- `POST /api/plug/what2eat/pick`
+- `POST /api/plug/what2eat/ai_suggest`
+
+## Notes
+
+- The plugin never uses `requests`; all model calls go through AstrBot provider APIs.
+- Invalid or malformed state is normalized automatically to safe defaults.

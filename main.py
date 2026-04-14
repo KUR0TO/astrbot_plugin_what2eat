@@ -164,6 +164,22 @@ def _parse_tree_value(tree_value: Any, fallback_label: str) -> dict[str, Any]:
     return _normalize_node({}, fallback_label=fallback_label)
 
 
+def _restore_template_keys(state: dict[str, Any]) -> dict[str, Any]:
+    categories = state.get("categories")
+    if isinstance(categories, list):
+        for category in categories:
+            if isinstance(category, dict):
+                category.setdefault("__template_key", "category")
+
+    flavors = state.get("flavors")
+    if isinstance(flavors, list):
+        for flavor in flavors:
+            if isinstance(flavor, dict):
+                flavor.setdefault("__template_key", "flavor")
+
+    return state
+
+
 def normalize_state(raw_state: Any) -> dict[str, Any]:
     base = default_state()
     if not isinstance(raw_state, dict):
@@ -330,7 +346,7 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
         if fid in flavor_ids:
             state["toggles"]["flavors"].append(fid)
 
-    return state
+    return _restore_template_keys(state)
 
 
 def _first_level_candidates(node: FoodNode) -> list[FoodNode]:
@@ -426,7 +442,7 @@ class What2EatPlugin(Star):
             )
             current_cfg = old_state
 
-        normalized_cfg = normalize_state(current_cfg)
+        normalized_cfg = _restore_template_keys(normalize_state(current_cfg))
         if not _deep_equal(normalized_cfg, dict(self.config)):
             self.config.save_config(normalized_cfg)
             logger.info("what2eat config normalized and persisted")
@@ -436,7 +452,7 @@ class What2EatPlugin(Star):
             self.config.save_config()
 
     def _state(self) -> dict[str, Any]:
-        return normalize_state(dict(self.config))
+        return _restore_template_keys(normalize_state(dict(self.config)))
 
     def _register_web_apis(self) -> None:
         self.context.register_web_api(
@@ -533,7 +549,7 @@ class What2EatPlugin(Star):
         payload = await request.get_json(silent=True)
         if not isinstance(payload, dict):
             return _error("invalid payload")
-        new_state = normalize_state(payload.get("state", payload))
+        new_state = _restore_template_keys(normalize_state(payload.get("state", payload)))
         self.config.save_config(new_state)
         return _ok(self._state(), "saved")
 
@@ -561,7 +577,7 @@ class What2EatPlugin(Star):
         raw_flavors = _clean_str_list(toggles.get("flavors", []))
         state["toggles"]["flavors"] = [fid for fid in raw_flavors if fid in flavor_ids]
 
-        self.config.save_config(state)
+        self.config.save_config(_restore_template_keys(state))
         return _ok(state["toggles"], "toggles updated")
 
     async def api_pick_preview(self):

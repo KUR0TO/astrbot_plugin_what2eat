@@ -148,6 +148,22 @@ def _normalize_node(node: Any, fallback_label: str = "Item") -> dict[str, Any]:
     return normalized
 
 
+def _parse_tree_value(tree_value: Any, fallback_label: str) -> dict[str, Any]:
+    if isinstance(tree_value, str):
+        try:
+            parsed = json.loads(tree_value)
+            if isinstance(parsed, dict):
+                return _normalize_node(parsed, fallback_label=fallback_label)
+        except Exception:  # noqa: BLE001
+            logger.error("invalid tree json for category %s", fallback_label)
+        return _normalize_node({}, fallback_label=fallback_label)
+
+    if isinstance(tree_value, dict):
+        return _normalize_node(tree_value, fallback_label=fallback_label)
+
+    return _normalize_node({}, fallback_label=fallback_label)
+
+
 def normalize_state(raw_state: Any) -> dict[str, Any]:
     base = default_state()
     if not isinstance(raw_state, dict):
@@ -168,6 +184,25 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
         for category in raw_categories:
             if not isinstance(category, dict):
                 continue
+
+            if category.get("__template_key") == "category":
+                cid = str(category.get("id") or "").strip()
+                if not cid:
+                    continue
+                label = str(category.get("label") or cid).strip() or cid
+                state["categories"].append(
+                    {
+                        "id": cid,
+                        "label": label,
+                        "enabled": bool(category.get("enabled", True)),
+                        "tree": _parse_tree_value(
+                            category.get("tree"),
+                            fallback_label=label,
+                        ),
+                    }
+                )
+                continue
+
             cid = str(category.get("id") or "").strip()
             if not cid:
                 continue
@@ -177,7 +212,7 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
                     "id": cid,
                     "label": label,
                     "enabled": bool(category.get("enabled", True)),
-                    "tree": _normalize_node(
+                    "tree": _parse_tree_value(
                         category.get("tree", {}), fallback_label=label
                     ),
                 }
@@ -200,7 +235,7 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
                     "id": cid,
                     "label": label,
                     "enabled": bool(category.get("enabled", True)),
-                    "tree": _normalize_node(tree_src, fallback_label=label),
+                    "tree": _parse_tree_value(tree_src, fallback_label=label),
                 }
             )
 
@@ -212,6 +247,24 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
         for flavor in raw_flavors:
             if not isinstance(flavor, dict):
                 continue
+
+            if flavor.get("__template_key") == "flavor":
+                fid = str(flavor.get("id") or "").strip()
+                label = str(flavor.get("label") or "").strip()
+                if not fid or not label:
+                    continue
+                state["flavors"].append(
+                    {
+                        "id": fid,
+                        "label": label,
+                        "description": str(flavor.get("description") or "").strip(),
+                        "enabled_by_default": bool(
+                            flavor.get("enabled_by_default", False)
+                        ),
+                    }
+                )
+                continue
+
             fid = str(flavor.get("id") or "").strip()
             label = str(flavor.get("label") or "").strip()
             if not fid or not label:
@@ -256,7 +309,6 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
                 }
             )
 
-    category_ids = {cat["id"] for cat in state["categories"]}
     raw_toggles = (
         raw_state.get("toggles", {})
         if isinstance(raw_state.get("toggles"), dict)
@@ -267,8 +319,11 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
         if isinstance(raw_toggles.get("categories"), dict)
         else {}
     )
-    for cid in category_ids:
-        state["toggles"]["categories"][cid] = bool(raw_category_toggles.get(cid, True))
+    for category in state["categories"]:
+        cid = category["id"]
+        state["toggles"]["categories"][cid] = bool(
+            raw_category_toggles.get(cid, category.get("enabled", True)),
+        )
 
     flavor_ids = {flavor["id"] for flavor in state["flavors"]}
     for fid in _clean_str_list(raw_toggles.get("flavors", [])):

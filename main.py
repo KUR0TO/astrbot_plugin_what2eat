@@ -80,11 +80,19 @@ def _clean_str_list(value: Any) -> list[str]:
     seen: set[str] = set()
     ret: list[str] = []
     for item in value:
-        text = str(item).strip()
-        if not text or text in seen:
-            continue
-        seen.add(text)
-        ret.append(text)
+        if isinstance(item, str):
+            parts = [item]
+            for sep in (",", "，", ";", "；"):
+                parts = [p for part in parts for p in part.split(sep)]
+            candidates = parts
+        else:
+            candidates = [str(item)]
+        for candidate in candidates:
+            text = str(candidate).strip()
+            if not text or text in seen:
+                continue
+            seen.add(text)
+            ret.append(text)
     return ret
 
 
@@ -164,6 +172,21 @@ def _parse_tree_value(tree_value: Any, fallback_label: str) -> dict[str, Any]:
     return _normalize_node({}, fallback_label=fallback_label)
 
 
+def _coerce_tree_strings(state: dict[str, Any]) -> dict[str, Any]:
+    categories = state.get("categories")
+    if not isinstance(categories, list):
+        return state
+
+    for category in categories:
+        if not isinstance(category, dict):
+            continue
+        tree = category.get("tree")
+        if isinstance(tree, dict):
+            category["tree"] = json.dumps(tree, ensure_ascii=False, indent=2)
+
+    return state
+
+
 def _restore_template_keys(state: dict[str, Any]) -> dict[str, Any]:
     categories = state.get("categories")
     if isinstance(categories, list):
@@ -211,10 +234,7 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
                         "id": cid,
                         "label": label,
                         "enabled": bool(category.get("enabled", True)),
-                        "tree": _parse_tree_value(
-                            category.get("tree"),
-                            fallback_label=label,
-                        ),
+                        "tree": category.get("tree", "{}"),
                     }
                 )
                 continue
@@ -228,9 +248,7 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
                     "id": cid,
                     "label": label,
                     "enabled": bool(category.get("enabled", True)),
-                    "tree": _parse_tree_value(
-                        category.get("tree", {}), fallback_label=label
-                    ),
+                    "tree": category.get("tree", "{}"),
                 }
             )
     elif isinstance(raw_categories, dict):
@@ -251,7 +269,7 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
                     "id": cid,
                     "label": label,
                     "enabled": bool(category.get("enabled", True)),
-                    "tree": _parse_tree_value(tree_src, fallback_label=label),
+                    "tree": tree_src,
                 }
             )
 
@@ -346,7 +364,13 @@ def normalize_state(raw_state: Any) -> dict[str, Any]:
         if fid in flavor_ids:
             state["toggles"]["flavors"].append(fid)
 
-    return _restore_template_keys(state)
+    # If no explicit flavor toggles are set, use enabled_by_default flavors.
+    if not state["toggles"]["flavors"]:
+        for flavor in state["flavors"]:
+            if flavor.get("enabled_by_default"):
+                state["toggles"]["flavors"].append(flavor["id"])
+
+    return _restore_template_keys(_coerce_tree_strings(state))
 
 
 def _first_level_candidates(node: FoodNode) -> list[FoodNode]:
@@ -497,7 +521,11 @@ class What2EatPlugin(Star):
             if not toggles.get(category_id, True):
                 continue
             try:
-                root = FoodNode.from_dict(category.get("tree", {}))
+                tree_dict = _parse_tree_value(
+                    category.get("tree", {}),
+                    fallback_label=category.get("label", category_id),
+                )
+                root = FoodNode.from_dict(tree_dict)
                 path = _pick_path(root, flavor_filter)
                 picked.append(
                     {
